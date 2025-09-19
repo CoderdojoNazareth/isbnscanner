@@ -1,0 +1,37 @@
+# Naam van de workflow
+name: Draai Python Tests
+
+# Bepaalt wanneer de workflow wordt uitgevoerd
+on:
+  # Activeren bij elke pull request naar de 'main' of 'master' branch
+  pull_request:
+    branches: [ main, master ]
+
+# Definieert de taken (jobs) die uitgevoerd moeten worden
+jobs:
+  # We noemen onze taak 'build'
+  build:
+    # De taak draait op de laatste versie van Ubuntu
+    runs-on: ubuntu-latest
+
+    # De stappen die uitgevoerd moeten worden
+    steps:
+      # Stap 1: De code van je repository "uitchecken" zodat de workflow er toegang toe heeft
+      - uses: actions/checkout@v3
+
+      # Stap 2: Python installeren en configureren
+      - name: Python 3.9 opzetten
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      # Stap 3: De benodigde packages installeren
+      - name: Afhankelijkheden installeren
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Stap 4: De tests uitvoeren met pytest
+      - name: Tests draaien
+        run: |
+          pytest
