@@ -28,10 +28,11 @@ Dit is een simpele Flask webapplicatie waarmee gebruikers de titel van een boek 
 
 1. **Kloon de repository of download de bestanden.**
 2. **Maak een virtual environment aan (aanbevolen):**
-```
+```python
    python \-m venv venv
    source venv/bin/activate  \# Gebruik \`venv\\Scripts\\activate\` op Windows
 ```
+
 3. **Installeer de afhankelijkheden:**
    `pip install \-r requirements.txt`
 
@@ -52,8 +53,8 @@ Als je niet bekend bent met Git en GitHub, is hier een basisworkflow om wijzigin
 ### **1\. Het project klonen**
 
 Kloon de repository naar je lokale machine. Hiermee download je alle projectbestanden. Gebruik de URL van de GitHub-pagina.
-`git clone \<URL\_VAN\_DE\_REPOSITORY\>`
-`cd \<NAAM\_VAN\_DE\_MAP\>`
+`git clone https://github.com/CoderdojoNazareth/isbnscanner.git`
+`cd isbnscanner`
 
 ### **2\. Een nieuwe branch aanmaken**
 
