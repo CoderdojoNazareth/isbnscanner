@@ -2,10 +2,11 @@
 name: Draai Python Tests
 
 # Bepaalt wanneer de workflow wordt uitgevoerd
+# Activeren bij elke pull request en bij mergen naar naar de 'main' branch
 on:
-  # Activeren bij elke pull request naar de 'main' of 'master' branch
   pull_request:
-    branches: [ main, master ]
+  push:
+    branches: [main]
 
 # Definieert de taken (jobs) die uitgevoerd moeten worden
 jobs:
@@ -23,7 +24,7 @@ jobs:
       - name: Python 3.9 opzetten
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: "3.9"
 
       # Stap 3: De benodigde packages installeren
       - name: Afhankelijkheden installeren
