@@ -1,11 +1,55 @@
 import csv
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, abort
+# for the github webhook
+import hmac
+import hashlib
+import subprocess
+import os
+from dotenv import load_dotenv
+# for the app
 from models import Book
+
+
+project_folder = os.path.expanduser('~/isbnscanner')  # adjust as appropriate
+load_dotenv(os.path.join(project_folder, '.env'))
 
 # Initialize the Flask application
 app = Flask(__name__)
 # A secret key is required for flashing messages
 app.secret_key = 'some_secret_key_for_development'
+
+# The auto deploy route
+WEBHOOK_SECRET = os.getenv('WEBHOOK_SECRET')
+if not WEBHOOK_SECRET:
+    raise ValueError("Error: WEBHOOK_SECRET environment variable not set.")
+
+# Get the deploy script path from an environment variable
+DEPLOY_SCRIPT_PATH = os.getenv('DEPLOY_SCRIPT_PATH')
+if not DEPLOY_SCRIPT_PATH:
+    raise ValueError("Error: DEPLOY_SCRIPT_PATH environment variable not set.")
+
+@app.route('/update_server', methods=['POST'])
+def webhook():
+    # Verify the request is from GitHub and the signature is valid
+    signature_header = request.headers.get('X-Hub-Signature-256')
+    if not signature_header:
+        abort(403)
+
+    hash_algorithm, signature = signature_header.split('=')
+    mac = hmac.new(WEBHOOK_SECRET.encode('utf-8'), msg=request.data, digestmod=hashlib.sha256)
+    if not hmac.compare_digest(mac.hexdigest(), signature):
+        abort(403)
+
+    # If the push is to the 'main' branch, run the deploy script
+    if request.json.get('ref') == 'refs/heads/main':
+        try:
+            subprocess.run([DEPLOY_SCRIPT_PATH], check=True)
+            return 'Server update initiated successfully.', 200
+        except subprocess.CalledProcessError as error:
+            return f'Script execution failed: {error}', 500
+
+    return 'Push was not to the main branch.', 200
+
 
 def load_books(filename='books.csv'):
     """Loads books from a CSV file into a list of Book objects."""
