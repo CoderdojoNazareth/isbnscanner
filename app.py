@@ -8,6 +8,7 @@ import os
 from dotenv import load_dotenv
 # for the app
 from models import Book
+from services import BookService
 
 
 project_folder = os.path.expanduser('~/isbnscanner')  # adjust as appropriate
@@ -61,13 +62,10 @@ def load_books(filename='books-bib-all.csv'):
         file_path = os.path.join(base_dir, filename)
         with open(file_path, mode='r', encoding='utf-8') as infile:
             # DictReader reads rows as dictionaries, which is perfect for our Book model
-            reader = csv.DictReader(infile)
+            reader = csv.DictReader(infile, delimiter=';')
             for row in reader:
                 clean_row = {str(k).strip().lower(): v for k, v in row.items()}
-                isbn = clean_row.get('isbn', '')
-
-                # Normalize ISBN: remove commas, spaces, and convert to string of digits if possible
-                isbn = str(isbn).replace(',', '').replace(' ', '').strip()
+                isbn = clean_row.get('isbn')
                 auteur = clean_row.get('auteur')
                 titel = clean_row.get('titel')
                 extra = {k: v for k, v in clean_row.items() if k not in ('isbn', 'auteur', 'titel')}
@@ -75,36 +73,27 @@ def load_books(filename='books-bib-all.csv'):
 
     except FileNotFoundError:
         print(f"Error: The file {file_path} was not found.")
-    return books
+    return BookService(books)
 
 # Load the books into memory when the application starts
-BOOKS = load_books()
+BOOK_SERVICE = load_books()
 
 @app.route('/')
 def index():
     """Renders the main page with the ISBN input form."""
-    return render_template('index.html')
+    return render_template('index.html', nr_of_books=BOOK_SERVICE.total_nr_of_books())
 
 @app.route('/zoek', methods=['POST'])
 def zoek():
-    """Handles the book search logic."""
-    submitted_isbn = request.form.get('isbn', '').strip().replace(',', '').replace(' ', '')
-    found_book = None
+    input = request.form.get('isbn', '')
+    print(input)
+    submitted_isbn = input.strip().replace(',', '').replace(' ', '')
+    found_book = BOOK_SERVICE.find_by_isbn(submitted_isbn)
 
-    # --- Search ---
-    # Normalize both user input and book ISBN for comparison
-    for book in BOOKS:
-        book_isbn = str(book.isbn).replace(',', '').replace(' ', '').strip()
-        if book_isbn == submitted_isbn:
-            found_book = book
-            break
-
-    # --- Result ---
     if not found_book:
         flash(f'Boek met ISBN {submitted_isbn} niet gevonden.', 'error')
 
-    return render_template('index.html', book=found_book)
+    return render_template('index.html', nr_of_books=BOOK_SERVICE.total_nr_of_books(), book=found_book)
 
 if __name__ == '__main__':
-    # Runs the app in debug mode for development
     app.run(debug=True)
