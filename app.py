@@ -20,16 +20,17 @@ app.secret_key = 'some_secret_key_for_development'
 
 # The auto deploy route
 WEBHOOK_SECRET = os.getenv('WEBHOOK_SECRET')
-if not WEBHOOK_SECRET:
-    raise ValueError("Error: WEBHOOK_SECRET environment variable not set.")
-
-# Get the deploy script path from an environment variable
 DEPLOY_SCRIPT_PATH = os.getenv('DEPLOY_SCRIPT_PATH')
-if not DEPLOY_SCRIPT_PATH:
-    raise ValueError("Error: DEPLOY_SCRIPT_PATH environment variable not set.")
+
 
 @app.route('/update_server', methods=['POST'])
 def webhook():
+    # Check for environment variables at request time
+    if not WEBHOOK_SECRET:
+        abort(500, description="WEBHOOK_SECRET environment variable not set.")
+    if not DEPLOY_SCRIPT_PATH:
+        abort(500, description="DEPLOY_SCRIPT_PATH environment variable not set.")
+
     # Verify the request is from GitHub and the signature is valid
     signature_header = request.headers.get('X-Hub-Signature-256')
     if not signature_header:
@@ -77,30 +78,28 @@ def index():
 def zoek():
     """Handles the book search logic."""
     submitted_isbn = request.form.get('isbn', '').strip()
+    found_book = None
 
     # --- Validation ---
     # 1. Check if the ISBN has the correct length
     if len(submitted_isbn) != 13:
         flash('Ongeldig ISBN. Een ISBN-nummer moet 13 karakters lang zijn.', 'error')
-        return redirect(url_for('index'))
+        return render_template('index.html', book=found_book)
 
     # --- Search ---
     # 2. Look for the book in our list
-    found_book = None
     for book in BOOKS:
         if book.isbn == submitted_isbn:
             found_book = book
             break
 
     # --- Result ---
-    # 3. Handle found or not found cases
-    if found_book:
-        # If found, show the result page
-        return render_template('resultaat.html', book=found_book)
-    else:
-        # If not found, show an error on the main page
+    # 3. Handle not found case
+    if not found_book:
         flash(f'Boek met ISBN {submitted_isbn} niet gevonden.', 'error')
-        return redirect(url_for('index'))
+
+    # If found, show the result on the main page, otherwise show error
+    return render_template('index.html', book=found_book)
 
 if __name__ == '__main__':
     # Runs the app in debug mode for development

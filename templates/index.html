@@ -19,7 +19,7 @@
         </style>
     </head>
     <body class="bg-gray-100 flex items-center justify-center min-h-screen">
-        <div class="w-full max-w-md mx-4">
+        <div class="w-full max-w-md mx-4 py-8">
             <!-- Flash messages section -->
             {% with messages = get_flashed_messages(with_categories=true) %} {%
             if messages %} {% for category, message in messages %}
@@ -29,43 +29,8 @@
             >
                 <span class="block sm:inline">{{ message }}</span>
             </div>
-            {% endfor %} {% endif %} {% endwith %}
-
-            <!-- Main search card -->
-            <div class="bg-white p-8 rounded-xl shadow-lg">
-                <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">
-                    Zoek een Boek!
-                </h1>
-                <p class="text-center text-gray-600 mb-6">
-                    Voer het 13-cijferige ISBN in om de titel te vinden.
-                </p>
-
-                <form action="{{ url_for('zoek') }}" method="POST">
-                    <div class="mb-4">
-                        <label
-                            for="isbn"
-                            class="block text-gray-700 text-sm font-bold mb-2"
-                            >ISBN</label
-                        >
-                        <input
-                            type="text"
-                            name="isbn"
-                            id="isbn"
-                            placeholder="bv. 9789023482329"
-                            required
-                            class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                    </div>
-                    <div class="flex items-center justify-center">
-                        <button
-                            type="submit"
-                            class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300"
-                        >
-                            Zoeken
-                        </button>
-                    </div>
-                </form>
-            </div>
+            {% endfor %} {% endif %} {% endwith %} {% include
+            '_search_form.html' %} {% include '_result.html' %}
         </div>
     </body>
 </html>
