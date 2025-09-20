@@ -52,7 +52,7 @@ def webhook():
     return 'Push was not to the main branch.', 200
 
 
-def load_books(filename='books-bib-all.csv'):
+def load_books(filename='books-bib-1000.csv'):
     """Loads books from a CSV file into a list of Book objects."""
     books = []
     try:
