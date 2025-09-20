@@ -56,21 +56,25 @@ def load_books(filename='books-bib-all.csv'):
     """Loads books from a CSV file into a list of Book objects."""
     books = []
     try:
-        with open(filename, mode='r', encoding='utf-8') as infile:
-            reader = csv.DictReader(infile, delimiter=';')
+        # Construct the absolute path to the CSV file
+        base_dir = os.path.abspath(os.path.dirname(__file__))
+        file_path = os.path.join(base_dir, filename)
+        with open(file_path, mode='r', encoding='utf-8') as infile:
+            # DictReader reads rows as dictionaries, which is perfect for our Book model
+            reader = csv.DictReader(infile)
             for row in reader:
                 clean_row = {str(k).strip().lower(): v for k, v in row.items()}
                 isbn = clean_row.get('isbn', '')
-                
+
                 # Normalize ISBN: remove commas, spaces, and convert to string of digits if possible
                 isbn = str(isbn).replace(',', '').replace(' ', '').strip()
                 auteur = clean_row.get('auteur')
                 titel = clean_row.get('titel')
                 extra = {k: v for k, v in clean_row.items() if k not in ('isbn', 'auteur', 'titel')}
                 books.append(Book(isbn, auteur, titel, **extra))
-                
+
     except FileNotFoundError:
-        print(f"Error: The file {filename} was not found.")
+        print(f"Error: The file {file_path} was not found.")
     return books
 
 # Load the books into memory when the application starts
