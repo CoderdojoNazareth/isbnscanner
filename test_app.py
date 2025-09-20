@@ -12,12 +12,12 @@ def client(app):
 def test_home_page_loads(client):
     response = client.get('/')
     assert response.status_code == 200
-    assert b"Zoek een Boek" in response.data
+    assert b"busca un libro!" in response.data
 
 def test_find_book_success(client):
     response = client.post('/zoek', data={'isbn': '9789023482329'})
     assert response.status_code == 200
-    assert b"Zoek een Boek" in response.data
+    assert b"busca un libro!" in response.data
     assert b"Boek Gevonden!" in response.data
     assert b"De Cirkel" in response.data
 

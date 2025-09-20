@@ -52,17 +52,24 @@ def webhook():
     return 'Push was not to the main branch.', 200
 
 
-def load_books(filename='books.csv'):
+def load_books(filename='books-bib-1000.csv'):
     """Loads books from a CSV file into a list of Book objects."""
     books = []
     try:
         with open(filename, mode='r', encoding='utf-8') as infile:
-            # DictReader reads rows as dictionaries, which is perfect for our Book model
-            reader = csv.DictReader(infile)
+            reader = csv.DictReader(infile, delimiter=';')
             for row in reader:
-                books.append(Book(**row))
+                clean_row = {str(k).strip().lower(): v for k, v in row.items()}
+                isbn = clean_row.get('isbn', '')
+                
+                # Normalize ISBN: remove commas, spaces, and convert to string of digits if possible
+                isbn = str(isbn).replace(',', '').replace(' ', '').strip()
+                auteur = clean_row.get('auteur')
+                titel = clean_row.get('titel')
+                extra = {k: v for k, v in clean_row.items() if k not in ('isbn', 'auteur', 'titel')}
+                books.append(Book(isbn, auteur, titel, **extra))
+                
     except FileNotFoundError:
-        # In a real app, you might want more robust error handling
         print(f"Error: The file {filename} was not found.")
     return books
 
@@ -77,28 +84,21 @@ def index():
 @app.route('/zoek', methods=['POST'])
 def zoek():
     """Handles the book search logic."""
-    submitted_isbn = request.form.get('isbn', '').strip()
+    submitted_isbn = request.form.get('isbn', '').strip().replace(',', '').replace(' ', '')
     found_book = None
 
-    # --- Validation ---
-    # 1. Check if the ISBN has the correct length
-    if len(submitted_isbn) != 13:
-        flash('Ongeldig ISBN. Een ISBN-nummer moet 13 karakters lang zijn.', 'error')
-        return render_template('index.html', book=found_book)
-
     # --- Search ---
-    # 2. Look for the book in our list
+    # Normalize both user input and book ISBN for comparison
     for book in BOOKS:
-        if book.isbn == submitted_isbn:
+        book_isbn = str(book.isbn).replace(',', '').replace(' ', '').strip()
+        if book_isbn == submitted_isbn:
             found_book = book
             break
 
     # --- Result ---
-    # 3. Handle not found case
     if not found_book:
         flash(f'Boek met ISBN {submitted_isbn} niet gevonden.', 'error')
 
-    # If found, show the result on the main page, otherwise show error
     return render_template('index.html', book=found_book)
 
 if __name__ == '__main__':
