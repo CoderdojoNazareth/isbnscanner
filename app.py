@@ -66,9 +66,10 @@ def load_books(filename='books-bib-all.csv'):
                 isbn = str(isbn).replace(',', '').replace(' ', '').strip()
                 auteur = clean_row.get('auteur')
                 titel = clean_row.get('titel')
-                extra = {k: v for k, v in clean_row.items() if k not in ('isbn', 'auteur', 'titel')}
-                books.append(Book(isbn, auteur, titel, **extra))
-                
+                plaatsing_omschrijving = clean_row.get('plaatsing omschrijving')
+                extra = {k: v for k, v in clean_row.items() if k not in ('isbn', 'auteur', 'titel', 'plaatsing omschrijving')}
+                books.append(Book(isbn, auteur, titel, plaatsing_omschrijving, **extra))
+
     except FileNotFoundError:
         print(f"Error: The file {filename} was not found.")
     return books
