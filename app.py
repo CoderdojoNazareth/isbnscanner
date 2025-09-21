@@ -23,45 +23,31 @@ app.secret_key = 'some_secret_key_for_development'
 WEBHOOK_SECRET = os.getenv('WEBHOOK_SECRET')
 DEPLOY_SCRIPT_PATH = os.getenv('DEPLOY_SCRIPT_PATH')
 
+
+# Load the books into memory when the application starts
 def load_books(filename='books-bib-all.csv'):
     """Loads books from a CSV file into a list of Book objects."""
     books = []
     try:
-        # Construct the absolute path to the CSV file
-        base_dir = os.path.abspath(os.path.dirname(__file__))
-        file_path = os.path.join(base_dir, filename)
-        with open(file_path, mode='r', encoding='utf-8') as infile:
-            # DictReader reads rows as dictionaries, which is perfect for our Book model
+        with open(filename, mode='r', encoding='utf-8') as infile:
             reader = csv.DictReader(infile, delimiter=';')
             for row in reader:
                 clean_row = {str(k).strip().lower(): v for k, v in row.items()}
-                isbn = clean_row.get('isbn')
+                isbn = clean_row.get('isbn', '')
+                # Normalize ISBN: remove commas, spaces, and convert to string of digits if possible
+                isbn = str(isbn).replace(',', '').replace(' ', '').strip()
                 auteur = clean_row.get('auteur')
                 titel = clean_row.get('titel')
-                books.append(Book(isbn, auteur, titel))
-
+                plaatsing_omschrijving = clean_row.get('plaatsing omschrijving')
+                extra = {k: v for k, v in clean_row.items() if k not in ('isbn', 'auteur', 'titel', 'plaatsing omschrijving')}
+                books.append(Book(isbn, auteur, titel, plaatsing_omschrijving, **extra))
     except FileNotFoundError:
-        print(f"Error: The file {file_path} was not found.")
-    return BookService(books)
+        print(f"Error: The file {filename} was not found.")
+    return books
 
-# Load the books into memory when the application starts
-BOOK_SERVICE = load_books()
+BOOKS = load_books()
 
-@app.route('/')
-def index():
-    return render_template('index.html', nr_of_books=BOOK_SERVICE.total_nr_of_books())
 
-@app.route('/zoek', methods=['POST'])
-def zoek():
-    input = request.form.get('isbn', '')
-    print(input)
-    submitted_isbn = input.strip().replace(',', '').replace(' ', '')
-    found_book = BOOK_SERVICE.find_by_isbn(submitted_isbn)
-
-    if not found_book:
-        flash(f'Boek met ISBN {submitted_isbn} niet gevonden.', 'error')
-
-    return render_template('index.html', nr_of_books=BOOK_SERVICE.total_nr_of_books(), book=found_book)
 
 @app.route('/update_server', methods=['POST'])
 def webhook():
@@ -90,9 +76,6 @@ def webhook():
 
     return 'Push was not to the main branch.', 200
 
-
-<<<<<<< HEAD
-<<<<<<< HEAD
 def load_books(filename='books-bib-all.csv'):
     """Loads books from a CSV file into a list of Book objects."""
     books = []
@@ -143,9 +126,5 @@ def zoek():
 
     return render_template('index.html', book=found_book)
 
-=======
->>>>>>> ef33d3fa65967d546df95d3a1fbb56a26c29fb63
-=======
->>>>>>> bbb12582eff15176f7e7e1a876187532d0b60fc3
 if __name__ == '__main__':
     app.run(debug=True)
