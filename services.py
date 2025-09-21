@@ -14,4 +14,4 @@ class BookService:
         return None
 
     def total_nr_of_books(self):
-        len(self._books)
+        return len(self._books)
