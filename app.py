@@ -92,6 +92,7 @@ def webhook():
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 def load_books(filename='books-bib-all.csv'):
     """Loads books from a CSV file into a list of Book objects."""
     books = []
@@ -144,5 +145,7 @@ def zoek():
 
 =======
 >>>>>>> ef33d3fa65967d546df95d3a1fbb56a26c29fb63
+=======
+>>>>>>> bbb12582eff15176f7e7e1a876187532d0b60fc3
 if __name__ == '__main__':
     app.run(debug=True)
