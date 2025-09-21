@@ -21,16 +21,25 @@
     <body class="bg-gray-100 flex items-center justify-center min-h-screen">
         <div class="w-full max-w-md mx-4 py-8">
             <!-- Flash messages section -->
-            {% with messages = get_flashed_messages(with_categories=true) %} {%
-            if messages %} {% for category, message in messages %}
-            <div
-                class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4"
-                role="alert"
-            >
-                <span class="block sm:inline">{{ message }}</span>
-            </div>
-            {% endfor %} {% endif %} {% endwith %} {% include
-            '_search_form.html' %} {% include '_result.html' %}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div
+                            class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4"
+                            role="alert">
+                            <span class="block sm:inline">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            {% include '_search_form.html' %}
+            {% include '_result.html' %}
+
+            {% if nr_of_books %}
+            <footer class="text-center text-gray-500 text-sm mt-6">
+                <p>Totaal aantal boeken in de database: {{ nr_of_books }}</p>
+            </footer>
+            {% endif %}
         </div>
     </body>
 </html>
