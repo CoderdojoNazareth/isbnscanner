@@ -44,7 +44,6 @@ def load_books(filename='books-bib-all.csv'):
         print(f"Error: The file {file_path} was not found.")
     return BookService(books)
 
-# Load the books into memory when the application starts
 BOOK_SERVICE = load_books()
 
 @app.route('/')
