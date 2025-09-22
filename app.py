@@ -38,7 +38,8 @@ def load_books(filename='books-bib-all.csv'):
                 isbn = clean_row.get('isbn')
                 auteur = clean_row.get('auteur')
                 titel = clean_row.get('titel')
-                books.append(Book(isbn, auteur, titel))
+                plaats = clean_row.get('plaatsing omschrijving')
+                books.append(Book(isbn, auteur, titel, plaats))
 
     except FileNotFoundError:
         print(f"Error: The file {file_path} was not found.")
